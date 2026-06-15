@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Convite</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       VARIAVEIS — altere COR_PRINCIPAL no bloco JS para mudar tudo
+    ============================================================ */
+    :root {
+      --cor:          #c0392b;  /* sincronizada via JS com COR_PRINCIPAL */
+      --cor-escura:   #8b1a1a;  /* derivada via JS */
+      --ouro:         #c9a96e;
+      --ouro-claro:   #e8d5a3;
+      --bg-1:         #0d0b18;
+      --bg-2:         #1a0e2e;
+      --vidro:        rgba(255, 255, 255, 0.06);
+      --vidro-borda:  rgba(255, 255, 255, 0.11);
+      --vidro-forte:  rgba(255, 255, 255, 0.18);
+      --texto:        #f0ece4;
+      --texto-suave:  rgba(240, 236, 228, 0.55);
+      --texto-fraco:  rgba(240, 236, 228, 0.27);
+      --sombra-cor:   0 8px 36px rgba(0, 0, 0, 0.55);
+      --progresso:    0%;
+    }
+
+    /* ============================================================
+       RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ============================================================
+       FUNDO — gradiente escuro com halos de cor (estilo haikei)
+    ============================================================ */
+    body {
+      font-family: 'Inter', sans-serif;
+      font-weight: 400;
+      color: var(--texto);
+      min-height: 100vh;
+      background:
+        radial-gradient(ellipse at 8%  88%, rgba(139, 20,  50, 0.20) 0%, transparent 50%),
+        radial-gradient(ellipse at 92% 12%, rgba(50,  20, 110, 0.25) 0%, transparent 50%),
+        radial-gradient(ellipse at 55% 50%, rgba(30,  15,  70, 0.18) 0%, transparent 60%),
+        linear-gradient(145deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      background-attachment: fixed;
+    }
+
+    /* ============================================================
+       WRAPPER DO APP — centraliza em telas largas
+    ============================================================ */
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 52px 22px 64px;
+      min-height: 100vh;
+    }
+
+    /* ============================================================
+       BARRA DE PROGRESSO FIXA NO TOPO
+    ============================================================ */
+    .progresso {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.06);
+      z-index: 200;
+    }
+    .progresso::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      height: 100%;
+      width: var(--progresso);
+      background: linear-gradient(90deg, var(--cor), var(--ouro));
+      border-radius: 0 2px 2px 0;
+      box-shadow: 0 0 12px rgba(201, 169, 110, 0.45);
+      transition: width 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ============================================================
+       TELAS — so uma visivel, com animacao de entrada
+    ============================================================ */
+    .tela { display: none; }
+
+    @keyframes entrar {
+      from { opacity: 0; transform: translateY(26px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .tela.ativa {
+      display: block;
+      animation: entrar 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* ============================================================
+       TIPOGRAFIA
+    ============================================================ */
+    h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.1rem;
+      font-weight: 300;
+      line-height: 1.22;
+      margin-bottom: 18px;
+      letter-spacing: 0.01em;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--ouro-claro);
+    }
+
+    h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      line-height: 1.25;
+      letter-spacing: 0.01em;
+    }
+
+    p {
+      font-size: 0.92rem;
+      color: var(--texto-suave);
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    /* Cabecalho de tela com icone + titulo */
+    .cab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .cab svg { opacity: 0.55; flex-shrink: 0; color: var(--ouro); }
+
+    /* Linha ornamental na abertura */
+    .ornamento {
+      display: block;
+      width: 36px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cor), var(--ouro));
+      border-radius: 2px;
+      margin-bottom: 30px;
+    }
+
+    /* ============================================================
+       BOTAO PADRAO — vidro com borda (opcao de selecao)
+    ============================================================ */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 20px;
+      margin-bottom: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 500;
+      letter-spacing: 0.025em;
+      cursor: pointer;
+      border: 1px solid var(--vidro-borda);
+      background: var(--vidro);
+      color: var(--texto);
+      border-radius: 14px;
+      text-align: center;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    }
+    .btn:hover  { background: rgba(255,255,255,0.1); border-color: var(--vidro-forte); }
+    .btn:active { transform: scale(0.97); }
+
+    .btn.selecionado {
+      background: linear-gradient(135deg, var(--cor) 0%, var(--cor-escura) 100%);
+      border-color: transparent;
+      box-shadow: 0 4px 20px rgba(192, 57, 43, 0.38);
+    }
+
+    /* Botao de acao principal (CTA) — preenchido */
+    .btn-cta {
+      background: linear-gradient(135deg, var(--cor) 0%, var(--cor-escura) 100%);
+      border-color: transparent;
+      box-shadow: 0 4px 26px rgba(192, 57, 43, 0.42);
+      font-weight: 600;
+    }
+    .btn-cta:hover {
+      background: linear-gradient(135deg, var(--cor) 15%, var(--cor-escura) 100%);
+      border-color: transparent;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 34px rgba(192, 57, 43, 0.52);
+    }
+    .btn-cta:active { transform: translateY(0) scale(0.98); }
+
+    /* ============================================================
+       CARDS DE FILME — glassmorphism com poster por indice
+    ============================================================ */
+    .filme-card {
+      display: flex;
+      border: 1px solid var(--vidro-borda);
+      border-radius: 16px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      background: var(--vidro);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transition: border-color 0.22s, box-shadow 0.22s, transform 0.18s;
+    }
+    .filme-card:hover  { border-color: var(--vidro-forte); box-shadow: var(--sombra-cor); }
+    .filme-card:active { transform: scale(0.98); }
+    .filme-card.selecionado {
+      border-color: var(--cor);
+      box-shadow: 0 4px 26px rgba(192, 57, 43, 0.32);
+    }
+
+    /* Area de poster: proporcao 2:3, imagem real com fallback em gradiente */
+    .filme-poster {
+      width: 80px;
+      height: 120px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.6rem;
+      font-weight: 400;
+      color: rgba(255,255,255,0.55);
+      overflow: hidden;
+      position: relative;
+      transition: opacity 0.2s;
+    }
+    /* Imagem real do poster — cobre o container sem distorcer */
+    .filme-poster img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* Texto exibido quando a imagem nao carrega */
+    .filme-poster-texto {
+      position: relative;
+      z-index: 1;
+    }
+    /* Gradientes de fallback por indice (ativados quando nao ha imagem) */
+    .filme-poster-0 { background: linear-gradient(155deg, #1a2a6c 0%, #b21f1f 60%, #fdbb2d 100%); }
+    .filme-poster-1 { background: linear-gradient(155deg, #0f0c29 0%, #302b63 55%, #24243e 100%); }
+    .filme-poster-2 { background: linear-gradient(155deg, #f7971e 0%, #ffd200 100%); color: rgba(0,0,0,0.45); }
+
+    .filme-info {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+    }
+    .filme-titulo {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 1.08rem;
+    }
+    .filme-genero { font-size: 0.78rem; color: var(--ouro); letter-spacing: 0.02em; }
+    .filme-meta   { font-size: 0.74rem; color: var(--texto-fraco); }
+
+    /* ============================================================
+       MAPA DE SALA
+    ============================================================ */
+    .sala-scroll {
+      overflow-x: auto;
+      padding: 4px 2px 14px;
+    }
+
+    .tela-label {
+      text-align: center;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      color: var(--texto-suave);
+      padding: 6px 16px;
+      border-radius: 6px;
+      letter-spacing: 11px;
+      font-size: 0.68rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .fileira {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 5px;
+      white-space: nowrap;
+    }
+    /* Corredor simulado entre fileiras B/C e D/E */
+    #mapa-sala .fileira:nth-child(3),
+    #mapa-sala .fileira:nth-child(5) { margin-top: 10px; }
+
+    .fileira-letra {
+      width: 18px;
+      font-size: 0.68rem;
+      color: var(--texto-fraco);
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .assento {
+      width: 28px;
+      height: 27px;
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 5px 5px 2px 2px;
+      font-size: 0.58rem;
+      cursor: pointer;
+      background: rgba(255,255,255,0.05);
+      color: var(--texto-suave);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      flex-shrink: 0;
+      transition: background 0.14s, border-color 0.14s, transform 0.1s;
+    }
+    .assento:not(.ocupado):hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.28); }
+    .assento:not(.ocupado):active { transform: scale(0.88); }
+
+    .assento.ocupado {
+      background: rgba(255,255,255,0.02);
+      color: rgba(255,255,255,0.1);
+      cursor: not-allowed;
+      border-color: rgba(255,255,255,0.05);
+    }
+    .assento.escolhido {
+      background: linear-gradient(135deg, var(--cor), var(--cor-escura));
+      color: white;
+      border-color: var(--cor);
+      box-shadow: 0 2px 10px rgba(192, 57, 43, 0.55);
+    }
+
+    /* Contador de assentos */
+    .contador {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      background: var(--vidro);
+      border: 1px solid var(--vidro-borda);
+      border-radius: 12px;
+      padding: 11px 16px;
+      font-size: 0.84rem;
+      color: var(--texto-suave);
+      margin-bottom: 16px;
+      min-height: 44px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .tag-assento {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--cor), var(--cor-escura));
+      color: white;
+      border-radius: 6px;
+      padding: 2px 9px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    /* ============================================================
+       BOMBONIERE
+    ============================================================ */
+    .grupo-label {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 400;
+      color: var(--ouro-claro);
+      margin: 20px 0 10px;
+    }
+    .grupo-label svg { opacity: 0.7; flex-shrink: 0; }
+
+    .grupo-linha {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .btn-grupo {
+      flex: 1;
+      min-width: 0;
+      padding: 11px 7px;
+      border: 1px solid var(--vidro-borda);
+      background: var(--vidro);
+      color: var(--texto);
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: background 0.17s, border-color 0.17s, transform 0.12s, box-shadow 0.17s;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-grupo:hover  { background: rgba(255,255,255,0.1); }
+    .btn-grupo:active { transform: scale(0.95); }
+    .btn-grupo.selecionado {
+      background: linear-gradient(135deg, var(--cor), var(--cor-escura));
+      border-color: transparent;
+      box-shadow: 0 3px 16px rgba(192, 57, 43, 0.38);
+    }
+
+    /* ============================================================
+       INPUT DE DATA
+    ============================================================ */
+    input[type="date"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 0.92rem;
+      font-family: 'Inter', sans-serif;
+      background: var(--vidro);
+      border: 1px solid var(--vidro-borda);
+      border-radius: 14px;
+      color: var(--texto);
+      margin-bottom: 20px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) opacity(0.45);
+      cursor: pointer;
+    }
+    input[type="date"]:focus {
+      outline: none;
+      border-color: rgba(192, 57, 43, 0.6);
+    }
+
+    /* ============================================================
+       RESUMO
+    ============================================================ */
+    .resumo-card {
+      background: var(--vidro);
+      border: 1px solid var(--vidro-borda);
+      border-radius: 18px;
+      padding: 4px 0;
+      margin-bottom: 22px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .resumo-item {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.055);
+    }
+    .resumo-item:last-child { border-bottom: none; }
+    .resumo-label {
+      font-weight: 500;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--texto-suave);
+      min-width: 76px;
+      flex-shrink: 0;
+    }
+    .resumo-valor { font-size: 0.9rem; color: var(--texto); }
+
+    /* ============================================================
+       ICONES — classe utilitaria
+    ============================================================ */
+    .ico { display: inline-flex; align-items: center; flex-shrink: 0; }
+
+    /* ============================================================
+       BOTAO DE SOM — fixo no canto inferior direito
+    ============================================================ */
+    .btn-som {
+      position: fixed;
+      bottom: 22px;
+      right: 22px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--vidro);
+      border: 1px solid var(--vidro-borda);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 150;
+      color: var(--texto-suave);
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .btn-som:hover        { background: var(--vidro-forte); color: var(--texto); }
+    .btn-som .ico-mudo    { display: none; }
+    .btn-som.mudo .ico-som  { display: none; }
+    .btn-som.mudo .ico-mudo { display: flex; }
+  
+.mapa-wrapper{overflow-x:auto;padding-bottom:10px}.mapa-cinema{min-width:820px}.assento-vazio{width:34px;height:30px;visibility:hidden}.tela-cinema-real{margin-top:18px;background:#d9d9d9;color:#111;font-weight:700;text-align:center;padding:12px;border-radius:14px;letter-spacing:2px}.legenda{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;margin-top:15px}.legenda-item{display:flex;align-items:center;gap:6px;font-size:13px}.legenda-cor{width:16px;height:16px;border-radius:4px}
+
+</style>
+
+<style id="seat-beauty-upgrade">
+.assento{
+    width:30px !important;
+    height:26px !important;
+    border-radius:10px !important;
+    font-size:10px !important;
+    font-weight:700 !important;
+    transition:all .25s ease !important;
+}
+.assento.livre{
+    background:linear-gradient(180deg,#35c85a,#229a43) !important;
+}
+.assento.selecionado{
+    transform:scale(1.08) !important;
+    box-shadow:0 0 12px rgba(30,136,229,.45) !important;
+}
+.fileira{
+    gap:4px !important;
+    margin-bottom:6px !important;
+}
+.assento-vazio{
+    width:30px !important;
+    height:26px !important;
+}
+.tela-cinema-real{
+    margin-top:22px !important;
+    border-radius:18px !important;
+    font-size:14px !important;
+    box-shadow:0 6px 20px rgba(0,0,0,.25);
+}
+.legenda{
+    margin-top:18px !important;
+}
+</style>
+
+</head>
+<body>
+
+  <!-- Barra de progresso fixa no topo da tela -->
+  <div class="progresso" aria-hidden="true"></div>
+
+  <!-- Trilha sonora em loop — iniciada no primeiro toque para respeitar politica de autoplay movel -->
+  <audio id="audio-trilha" loop preload="none"></audio>
+
+  <!-- Botao fixo de silenciar/ativar som -->
+  <button class="btn-som" id="btn-som" onclick="toggleMudo()" aria-label="Silenciar ou ativar musica">
+    <span class="ico ico-som">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+    </span>
+    <span class="ico ico-mudo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+    </span>
+  </button>
+
+  <div class="app">
+
+    <!-- TELA 1: ABERTURA -->
+    <section id="tela-abertura" class="tela ativa">
+      <span class="ornamento"></span>
+      <h1>Tenho <em>uma proposta</em><br>para voce.</h1>
+      <p>Que tal a gente sair juntos em junho?</p>
+      <button class="btn btn-cta" onclick="irPara('tela-lugar')">
+        Quero ver
+        <span class="ico">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </span>
+      </button>
+    </section>
+
+    <!-- TELA 2: LUGAR -->
+    <section id="tela-lugar" class="tela">
+      <div class="cab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <h2>O que voce prefere?</h2>
+      </div>
+      <button class="btn" onclick="escolherLugar('cinema')">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+        </span>
+        Cinema
+      </button>
+      <button class="btn" onclick="escolherLugar('bar')">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h8"/><path d="M12 11v11"/><path d="M20 3H4l8 9.46L20 3z"/></svg>
+        </span>
+        Bar
+      </button>
+      <button class="btn" onclick="escolherLugar('restaurante')">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+        </span>
+        Restaurante
+      </button>
+    </section>
+
+    <!-- TELA 3: CINEMA — FILME -->
+    <section id="tela-cinema-filme" class="tela">
+      <div class="cab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+        <h2>Qual filme?</h2>
+      </div>
+      <!-- Cards preenchidos dinamicamente a partir do array FILMES -->
+      <div id="lista-filmes"></div>
+      <button class="btn btn-cta" id="btn-ok-filme" style="display:none; margin-top:8px;"
+              onclick="irPara('tela-cinema-assentos')">
+        Proximo
+        <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </button>
+    </section>
+
+    <!-- TELA 4: CINEMA — ASSENTOS -->
+    <section id="tela-cinema-assentos" class="tela">
+      <div class="cab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v3"/><path d="M4 10a2 2 0 0 0-2 2v1a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2H4z"/><path d="M6 15v4"/><path d="M18 15v4"/></svg>
+        <h2>Escolha 2 assentos</h2>
+      </div>
+
+      <!-- Contador: icone estatico + texto atualizado pelo JS -->
+      <div class="contador" id="contador-assentos">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.35;flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span id="contador-texto">Selecionados: nenhum (0/2)</span>
+      </div>
+
+      <div class="sala-scroll">
+        <div class="tela-label">T E L A</div>
+        <!-- Fileiras geradas dinamicamente -->
+        <div id="mapa-sala" class="mapa-cinema"></div>
+<div class="tela-cinema-real">TELA DO CINEMA</div>
+<div class="legenda">
+<div class="legenda-item"><div class="legenda-cor" style="background:#28a745"></div><span>Desocupada</span></div>
+<div class="legenda-item"><div class="legenda-cor" style="background:#111"></div><span>Ocupada</span></div>
+<div class="legenda-item"><div class="legenda-cor" style="background:#bdbdbd"></div><span>Tipo diferente</span></div>
+<div class="legenda-item"><div class="legenda-cor" style="background:#1e88e5"></div><span>Selecionada</span></div>
+</div>
+      </div>
+
+      <button class="btn btn-cta" id="btn-ok-assentos" style="display:none; margin-top:8px;"
+              onclick="irPara('tela-cinema-bomboniere')">
+        Proximo
+        <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </button>
+    </section>
+
+    <!-- TELA 5: CINEMA — BOMBONIERE -->
+    <section id="tela-cinema-bomboniere" class="tela">
+      <div class="cab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        <h2>Bomboniere</h2>
+      </div>
+
+      <p class="grupo-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Pipoca
+      </p>
+      <div class="grupo-linha" id="grupo-pipoca"></div>
+
+      <p class="grupo-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h8"/><path d="M12 11v11"/><path d="M20 3H4l8 9.46L20 3z"/></svg>
+        Bebida
+      </p>
+      <div class="grupo-linha" id="grupo-bebida"></div>
+
+      <p class="grupo-label">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        Doce
+      </p>
+      <div class="grupo-linha" id="grupo-doce"></div>
+
+      <button class="btn btn-cta" id="btn-ok-bomboniere" style="display:none; margin-top:20px;"
+              onclick="irPara('tela-data')">
+        Proximo
+        <span class="ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+      </button>
+    </section>
+
+    <!-- TELA 6: BAR -->
+    <section id="tela-bar" class="tela">
+      <div class="cab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22h8"/><path d="M12 11v11"/><path d="M20 3H4l8 9.46L20 3z"/></svg>
+        <h2>Qual estilo de bar?</h2>
+      </div>
+      <button class="btn" onclick="escolherBarEstilo('Cervejaria')">Cervejaria</button>
+      <button class="btn" onclick="escolherBarEstilo('Bar de drinks')">Bar de drinks</button>
+      <button class="btn" onclick="escolherBarEstilo('Bar de vinhos')">Bar de vinhos</button>
+    </section>
+
+    <!-- TELA 7: RESTAURANTE -->
+    <section id="tela-restaurante" class="tela">
+      <div class="cab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+        <h2>Qual cozinha?</h2>
+      </div>
+      <!-- Botoes preenchidos dinamicamente a partir do array COZINHAS -->
+      <div id="lista-cozinhas"></div>
+    </section>
+
+    <!-- TELA 8: DATA E HORARIO -->
+    <section id="tela-data" class="tela">
+      <div class="cab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <h2>Quando?</h2>
+      </div>
+      <p>Escolha uma data entre 19 e 28 de junho de 2026.</p>
+      <input type="date" id="campo-data"
+             min="2026-06-19" max="2026-06-28"
+             onchange="escolherData(this.value)">
+      <!-- Blocos de horario aparecem apos escolher a data -->
+      <div id="horarios-secao" style="display:none;">
+        <div class="cab" style="margin-bottom:14px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <h2>Qual horario?</h2>
+        </div>
+        <div id="blocos-horario"></div>
+      </div>
+    </section>
+
+    <!-- TELA 9: RESUMO -->
+    <section id="tela-resumo" class="tela">
+      <div class="cab">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <h2>Resumo das escolhas</h2>
+      </div>
+      <!-- Linhas preenchidas dinamicamente pelo JS -->
+      <div class="resumo-card" id="resumo-conteudo"></div>
+      <button class="btn btn-cta" onclick="enviarResposta()">
+        <span class="ico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+        </span>
+        Enviar resposta
+      </button>
+    </section>
+
+  </div><!-- /.app -->
+
+
+  <script>
+    // ============================================================
+    // CONSTANTES EDITAVEIS
+    // ============================================================
+
+    // Arquivos de midia que devem ficar na mesma pasta que convite.html:
+    //   Posteres : supergirl.jpg  |  segredo-obscuro.jpg  |  toy-story-5.jpg
+    //   Trilha   : arquivo indicado em MUSICA (use uma faixa livre de direitos autorais)
+
+    const NUMERO_WHATSAPP = '5579999669829';
+    const COR_PRINCIPAL   = '#c0392b';
+    const MUSICA          = 'trilha.mp3';
+
+    const FILMES = [
+      {
+        titulo:        'Supergirl',
+        poster:        'super_girl.jpg',
+        genero:        'Acao / Aventura',
+        classificacao: '12 anos',
+        duracao:       '2h15min'
+      },
+      {
+        titulo:        'Segredo Obscuro',
+        poster:        'segredo_obscuro.jpg',
+        genero:        'Terror / Suspense',
+        classificacao: '16 anos',
+        duracao:       '1h58min'
+      },
+      {
+        titulo:        'Toy Story 5',
+        poster:        'toy_story.jpg',
+        genero:        'Animacao',
+        classificacao: 'Livre',
+        duracao:       '1h42min'
+      }
+    ];
+
+    const COZINHAS = ['Italiana', 'Japonesa', 'Brasileira', 'Hamburgueria'];
+
+    const OPCOES_PIPOCA = ['P — Pequena', 'M — Media', 'G — Grande'];
+    const OPCOES_BEBIDA = ['Refrigerante', 'Suco', 'Agua', 'Cerveja artesanal'];
+    const OPCOES_DOCE   = ['M&Ms', 'Bis', 'Chocolate', 'Sem doce'];
+
+    const HORARIOS = ['14:00', '16:00', '18:00', '20:00', '21:30'];
+
+    // Layout do mapa: fileiras A-F, 10 assentos cada
+    const CONFIG_FILEIRAS = [
+  { letra: 'K', qtd: 22 },{ letra: 'J', qtd: 22 },
+  { letra: 'I', qtd: 18 },{ letra: 'H', qtd: 18 },{ letra: 'G', qtd: 18 },
+  { letra: 'F', qtd: 14 },{ letra: 'E', qtd: 14 },{ letra: 'D', qtd: 14 },{ letra: 'C', qtd: 14 },
+  { letra: 'B', qtd: 14 },{ letra: 'A', qtd: 14 }
+];
+const ASSENTOS_OCUPADOS = ['K20','K19','K10','J14','J13','I08','I09','H12','H13','G05','G06','F09','F10','E07','D11','C04','B08','A05'];
+const ASSENTOS_ESPECIAIS = ['K01','K02','J01','I18','G18','F14','C14'];
+
+
+    // ============================================================
+    // PROGRESSO VISUAL — mapa tela -> percentual da barra
+    // ============================================================
+    const MAPA_PROGRESSO = {
+      'tela-abertura':          0,
+      'tela-lugar':             14,
+      'tela-cinema-filme':      28,
+      'tela-cinema-assentos':   44,
+      'tela-cinema-bomboniere': 60,
+      'tela-bar':               28,
+      'tela-restaurante':       28,
+      'tela-data':              76,
+      'tela-resumo':            100
+    };
+
+
+    // ============================================================
+    // INICIALIZACAO
+    // ============================================================
+
+    // Aplica COR_PRINCIPAL e deriva --cor-escura para os gradientes
+    document.documentElement.style.setProperty('--cor', COR_PRINCIPAL);
+    document.documentElement.style.setProperty('--cor-escura', escurecerCor(COR_PRINCIPAL, 30));
+
+    // Configura o elemento de audio; src e volume definidos aqui, play() so ocorre no primeiro toque
+    const audioEl = document.getElementById('audio-trilha');
+    audioEl.src    = MUSICA;
+    audioEl.volume = 0.4;
+
+    // Estado do som guardado em memoria (nunca em localStorage)
+    let musicaIniciada = false;
+    let mudo           = false;
+
+    // Objeto central — acumula todas as escolhas em memoria, nunca toca localStorage
+    const escolhas = {
+      lugar:     null,
+      filme:     null,
+      assentos:  [],       // ex: ['C7', 'C8']
+      pipoca:    null,
+      bebida:    null,
+      doce:      null,
+      estiloBar: null,
+      cozinha:   null,
+      data:      null,
+      horario:   null
+    };
+
+    // Gera elementos fixos ao carregar a pagina
+    renderizarFilmes();
+    renderizarMapa();
+    renderizarBomboniere();
+    renderizarCozinhas();
+
+
+    // ============================================================
+    // UTILITARIO — escurece uma cor hex em pct pontos (0-100)
+    // ============================================================
+    function escurecerCor(hex, pct) {
+      const n = parseInt(hex.replace('#', ''), 16);
+      const d = Math.round(pct * 2.55);
+      const r = Math.max(0, (n >> 16)        - d);
+      const g = Math.max(0, ((n >> 8) & 0xff) - d);
+      const b = Math.max(0, (n & 0xff)        - d);
+      return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+    }
+
+    // ============================================================
+    // CONTROLE DE AUDIO
+    // ============================================================
+
+    function toggleMudo() {
+      mudo = !mudo;
+      audioEl.muted = mudo;
+      document.getElementById('btn-som').classList.toggle('mudo', mudo);
+    }
+
+
+    // ============================================================
+    // NAVEGACAO
+    // ============================================================
+
+    function irPara(idTela) {
+      document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+      document.getElementById(idTela).classList.add('ativa');
+      window.scrollTo(0, 0);
+      // Atualiza a barra de progresso (puramente visual)
+      const pct = MAPA_PROGRESSO[idTela] ?? 0;
+      document.documentElement.style.setProperty('--progresso', pct + '%');
+      // Inicia a musica no primeiro toque — navegadores moveis exigem gesto do usuario
+      if (!musicaIniciada) {
+        musicaIniciada = true;
+        audioEl.play().catch(() => { /* bloqueio silencioso em ambientes sem interacao */ });
+      }
+    }
+
+
+    // ============================================================
+    // TELA: LUGAR
+    // ============================================================
+
+    function escolherLugar(lugar) {
+      escolhas.lugar = lugar;
+
+      // Limpa escolhas de programa anteriores para permitir retorno limpo
+      Object.assign(escolhas, {
+        filme: null, assentos: [],
+        pipoca: null, bebida: null, doce: null,
+        estiloBar: null, cozinha: null
+      });
+
+      if (lugar === 'cinema') {
+        resetarTelaCinema();
+        irPara('tela-cinema-filme');
+      } else if (lugar === 'bar') {
+        irPara('tela-bar');
+      } else {
+        irPara('tela-restaurante');
+      }
+    }
+
+    // Volta os tres passos do cinema ao estado inicial
+    function resetarTelaCinema() {
+      document.querySelectorAll('#lista-filmes .filme-card').forEach(c => c.classList.remove('selecionado'));
+      document.getElementById('btn-ok-filme').style.display = 'none';
+
+      escolhas.assentos = [];
+      document.querySelectorAll('.assento.escolhido').forEach(b => b.classList.remove('escolhido'));
+      atualizarContadorAssentos();
+
+      document.querySelectorAll('#tela-cinema-bomboniere .btn-grupo').forEach(b => b.classList.remove('selecionado'));
+      document.getElementById('btn-ok-bomboniere').style.display = 'none';
+    }
+
+
+    // ============================================================
+    // TELA: CINEMA — FILMES
+    // ============================================================
+
+    function renderizarFilmes() {
+      const container = document.getElementById('lista-filmes');
+
+      FILMES.forEach((f, idx) => {
+        const card = document.createElement('div');
+        card.className = 'filme-card';
+
+        // Iniciais como placeholder do poster; classe por indice define o gradiente
+        const iniciais = f.titulo.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+        const meta     = [f.classificacao, f.duracao].filter(Boolean).join(' — ');
+
+        const poster = document.createElement('div');
+        poster.className = `filme-poster filme-poster-${idx}`;
+
+        if (f.poster) {
+          const img = document.createElement('img');
+          img.alt = f.titulo;
+          // Fallback elegante: remove a imagem e exibe as iniciais se o arquivo nao existir
+          img.onerror = () => {
+            img.remove();
+            const txt = document.createElement('span');
+            txt.className   = 'filme-poster-texto';
+            txt.textContent = iniciais;
+            poster.appendChild(txt);
+          };
+          // src atribuido apos onerror para garantir que o handler ja esta registrado
+          img.src = f.poster;
+          poster.appendChild(img);
+        } else {
+          const txt = document.createElement('span');
+          txt.className   = 'filme-poster-texto';
+          txt.textContent = iniciais;
+          poster.appendChild(txt);
+        }
+
+        const info   = document.createElement('div');
+        info.className = 'filme-info';
+
+        const titulo = document.createElement('div');
+        titulo.className   = 'filme-titulo';
+        titulo.textContent = f.titulo;
+
+        const genero = document.createElement('div');
+        genero.className   = 'filme-genero';
+        genero.textContent = f.genero;
+
+        info.appendChild(titulo);
+        info.appendChild(genero);
+
+        if (meta) {
+          const metaEl = document.createElement('div');
+          metaEl.className   = 'filme-meta';
+          metaEl.textContent = meta;
+          info.appendChild(metaEl);
+        }
+
+        card.appendChild(poster);
+        card.appendChild(info);
+
+        card.addEventListener('click', () => {
+          document.querySelectorAll('#lista-filmes .filme-card').forEach(c => c.classList.remove('selecionado'));
+          card.classList.add('selecionado');
+          escolhas.filme = f.titulo;
+          document.getElementById('btn-ok-filme').style.display = 'flex';
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+
+    // ============================================================
+    // TELA: CINEMA — MAPA DE ASSENTOS
+    // ============================================================
+
+    function renderizarMapa() {
+const mapa=document.getElementById('mapa-sala'); mapa.innerHTML='';
+CONFIG_FILEIRAS.forEach(fileira=>{const linha=document.createElement('div');linha.className='fileira';
+const letra=document.createElement('div');letra.className='fileira-letra';letra.textContent=fileira.letra;linha.appendChild(letra);
+const vazios=Math.floor((22-fileira.qtd)/2);
+for(let i=0;i<vazios;i++){const e=document.createElement('div');e.className='assento-vazio';linha.appendChild(e);}
+for(let numero=fileira.qtd;numero>=1;numero--){const codigo=fileira.letra+String(numero).padStart(2,'0');const btn=document.createElement('button');btn.textContent=String(numero).padStart(2,'0');
+btn.dataset.assento=codigo;
+if(ASSENTOS_OCUPADOS.includes(codigo)){btn.className='assento ocupado';btn.disabled=true;}
+else if(ASSENTOS_ESPECIAIS.includes(codigo)){btn.className='assento especial';btn.disabled=true;}
+else{btn.className='assento livre';btn.onclick=()=>selecionarAssento(codigo,btn);}
+linha.appendChild(btn);}
+for(let i=0;i<vazios;i++){const e=document.createElement('div');e.className='assento-vazio';linha.appendChild(e);}
+mapa.appendChild(linha);});}
+
+    function selecionarAssento(codigo,btn){const indice=escolhas.assentos.indexOf(codigo);if(indice>-1){escolhas.assentos.splice(indice,1);btn.classList.remove('selecionado');}else{if(escolhas.assentos.length>=2){const removido=escolhas.assentos.shift();document.querySelector(`[data-assento="${removido}"]`)?.classList.remove('selecionado');}escolhas.assentos.push(codigo);btn.classList.add('selecionado');}atualizarContadorAssentos();}
+
+    function atualizarContadorAssentos(){const texto=escolhas.assentos.length?escolhas.assentos.join(', '):'Nenhum';document.getElementById('contador-texto').textContent=`Selecionados: ${texto}`;document.getElementById('btn-ok-assentos').style.display=escolhas.assentos.length===2?'flex':'none';}
+
+
+    // ============================================================
+    // TELA: CINEMA — BOMBONIERE
+    // ============================================================
+
+    function renderizarBomboniere() {
+      criarGrupo('grupo-pipoca', OPCOES_PIPOCA, 'pipoca');
+      criarGrupo('grupo-bebida', OPCOES_BEBIDA, 'bebida');
+      criarGrupo('grupo-doce',   OPCOES_DOCE,   'doce');
+    }
+
+    // Cria os botoes de um grupo e grava a escolha no campo indicado de escolhas{}
+    function criarGrupo(idContainer, opcoes, campo) {
+      const container = document.getElementById(idContainer);
+
+      opcoes.forEach(opcao => {
+        const btn = document.createElement('button');
+        btn.className   = 'btn-grupo';
+        btn.textContent = opcao;
+
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.btn-grupo').forEach(b => b.classList.remove('selecionado'));
+          btn.classList.add('selecionado');
+          escolhas[campo] = opcao;
+          verificarBomboniereCompleta();
+        });
+
+        container.appendChild(btn);
+      });
+    }
+
+    // Exibe o botao de avancar somente quando os tres grupos tiverem selecao
+    function verificarBomboniereCompleta() {
+      const completo = escolhas.pipoca && escolhas.bebida && escolhas.doce;
+      document.getElementById('btn-ok-bomboniere').style.display = completo ? 'flex' : 'none';
+    }
+
+
+    // ============================================================
+    // TELA: BAR
+    // ============================================================
+
+    function escolherBarEstilo(estilo) {
+      escolhas.estiloBar = estilo;
+      irPara('tela-data');
+    }
+
+
+    // ============================================================
+    // TELA: RESTAURANTE
+    // ============================================================
+
+    function renderizarCozinhas() {
+      const container = document.getElementById('lista-cozinhas');
+
+      COZINHAS.forEach(cozinha => {
+        const btn = document.createElement('button');
+        btn.className   = 'btn';
+        btn.textContent = cozinha;
+        btn.addEventListener('click', () => {
+          escolhas.cozinha = cozinha;
+          irPara('tela-data');
+        });
+        container.appendChild(btn);
+      });
+    }
+
+
+    // ============================================================
+    // TELA: DATA E HORARIO
+    // ============================================================
+
+    function escolherData(valor) {
+      escolhas.data    = valor;
+      escolhas.horario = null;
+
+      const container = document.getElementById('blocos-horario');
+      container.innerHTML = '';
+
+      HORARIOS.forEach(h => {
+        const btn = document.createElement('button');
+        btn.className   = 'btn';
+        btn.textContent = h;
+        btn.addEventListener('click', () => {
+          container.querySelectorAll('.btn').forEach(b => b.classList.remove('selecionado'));
+          btn.classList.add('selecionado');
+          escolhas.horario = h;
+          // Pequena pausa para o usuario ver o estado selecionado antes de avancar
+          setTimeout(montarResumoEIr, 350);
+        });
+        container.appendChild(btn);
+      });
+
+      document.getElementById('horarios-secao').style.display = 'block';
+    }
+
+
+    // ============================================================
+    // TELA: RESUMO
+    // ============================================================
+
+    function montarResumoEIr() {
+      const container = document.getElementById('resumo-conteudo');
+      container.innerHTML = '';
+
+      const linhas = [];
+
+      if (escolhas.lugar === 'cinema') {
+        linhas.push({ label: 'Programa', valor: 'Cinema' });
+        linhas.push({ label: 'Filme',    valor: escolhas.filme });
+        linhas.push({ label: 'Assentos', valor: escolhas.assentos.join('  e  ') });
+        linhas.push({ label: 'Pipoca',   valor: escolhas.pipoca });
+        linhas.push({ label: 'Bebida',   valor: escolhas.bebida });
+        linhas.push({ label: 'Doce',     valor: escolhas.doce });
+      } else if (escolhas.lugar === 'bar') {
+        linhas.push({ label: 'Programa', valor: 'Bar' });
+        linhas.push({ label: 'Estilo',   valor: escolhas.estiloBar });
+      } else {
+        linhas.push({ label: 'Programa', valor: 'Restaurante' });
+        linhas.push({ label: 'Cozinha',  valor: escolhas.cozinha });
+      }
+
+      if (escolhas.data) {
+        const [ano, mes, dia] = escolhas.data.split('-');
+        linhas.push({ label: 'Data', valor: `${dia}/${mes}/${ano}` });
+      }
+      linhas.push({ label: 'Horario', valor: escolhas.horario });
+
+      // Usa textContent para nao depender de innerHTML ao renderizar valores do usuario
+      linhas.forEach(({ label, valor }) => {
+        const div = document.createElement('div');
+        div.className = 'resumo-item';
+
+        const labelEl = document.createElement('span');
+        labelEl.className   = 'resumo-label';
+        labelEl.textContent = label;
+
+        const valorEl = document.createElement('span');
+        valorEl.className   = 'resumo-valor';
+        valorEl.textContent = valor ?? '—';
+
+        div.appendChild(labelEl);
+        div.appendChild(valorEl);
+        container.appendChild(div);
+      });
+
+      irPara('tela-resumo');
+    }
+
+
+    // ============================================================
+    // ENVIO FINAL VIA WHATSAPP
+    // ============================================================
+
+    function enviarResposta() {
+      const linhas = ['Minhas escolhas para o nosso encontro:', ''];
+
+      if (escolhas.lugar === 'cinema') {
+        linhas.push('Programa: Cinema');
+        linhas.push(`Filme: ${escolhas.filme}`);
+        linhas.push(`Assentos: ${escolhas.assentos.join(' e ')}`);
+        linhas.push(`Pipoca: ${escolhas.pipoca}`);
+        linhas.push(`Bebida: ${escolhas.bebida}`);
+        linhas.push(`Doce: ${escolhas.doce}`);
+      } else if (escolhas.lugar === 'bar') {
+        linhas.push('Programa: Bar');
+        linhas.push(`Estilo: ${escolhas.estiloBar}`);
+      } else {
+        linhas.push('Programa: Restaurante');
+        linhas.push(`Cozinha: ${escolhas.cozinha}`);
+      }
+
+      if (escolhas.data) {
+        const [ano, mes, dia] = escolhas.data.split('-');
+        linhas.push(`Data: ${dia}/${mes}/${ano}`);
+      }
+      linhas.push(`Horario: ${escolhas.horario}`);
+
+      const msg = linhas.join('\n');
+      const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank', 'noreferrer');
+    }
+  </script>
+</body>
+</html>
